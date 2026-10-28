@@ -1,0 +1,4 @@
+/* v6: activo (lo escribe su agente) */
+/* la casa, una huella: el botón que prueba el sello desde el último compás */
+.beat.huella .boton { margin-top: 18px; }
+@media (max-width: 760px) { .beat.huella .entrada { font-size: 15px; } }

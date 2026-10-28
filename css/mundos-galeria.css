@@ -1,0 +1,114 @@
+/* ─────────────────────────────────────────────────────────────────────
+   CUEVA · los mundos, contados con el scroll (js/mundos/galeria.js)
+   Un escenario blanco fijo y una baraja en profundidad: la tarjeta activa al frente, casi a
+   pantalla completa, y la pila esperando a la derecha en perspectiva; al final, la rejilla.
+   Todo lo que se mueve lo hace con transform y opacity.
+   ───────────────────────────────────────────────────────────────────── */
+.mg { --mg-tinta: #1B2951; --mg-suave: #5B6478; --mg-niebla: #F4F6F9; --mg-radio: 28px; color: var(--mg-tinta); }
+
+/* la pista da el recorrido; el escenario se queda fijo dentro, a sangre */
+.mg-pista { position: relative; height: 640vh; margin-inline: calc(-1 * var(--margen)); }
+.mg-escena { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #FFFFFF; }
+
+/* la apertura: el titular de la sección, a la izquierda de la baraja cerrada */
+.mg-intro { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 var(--margen); pointer-events: none; will-change: transform, opacity; z-index: 2; }
+.mg-intro .cabeza { margin: 0; max-width: min(46vw, 620px); display: block; }
+.mg-intro .cabeza h2 { font-size: clamp(46px, 6vw, 104px); }
+.mg-intro .cabeza .entrada { margin-top: 26px; max-width: 34ch; padding: 0; }
+
+/* el rótulo del capítulo y su contador */
+.mg-capitulo { position: absolute; left: var(--margen); top: var(--cap-top, 120px); z-index: 2; display: flex; align-items: baseline; gap: 12px; pointer-events: none; will-change: opacity; }
+.mg-capitulo b { font-size: clamp(22px, 2vw, 30px); font-weight: 700; letter-spacing: -0.035em; }
+.mg-capitulo span { font-size: 15px; font-weight: 500; color: var(--mg-suave); font-variant-numeric: tabular-nums; }
+.mg-capitulo.cambia b, .mg-capitulo.cambia span { animation: mg-rotulo .7s cubic-bezier(.2, .7, .2, 1) both; }
+.mg-capitulo.cambia span { animation-delay: .06s; }
+@keyframes mg-rotulo { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* la baraja: un espacio 3D en el que cada tarjeta se coloca con su transform */
+.mg-mazo { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; perspective: 1700px; perspective-origin: 50% 45%; transform-style: preserve-3d; z-index: 1; }
+.mg-c { position: absolute; left: 50%; top: 50%; width: var(--W); height: var(--H); margin: calc(var(--H) / -2) 0 0 calc(var(--W) / -2);
+  transform-origin: 50% 50%; will-change: transform, opacity; backface-visibility: hidden; }
+.mg-c a { position: relative; display: block; width: 100%; height: 100%; color: #FFFFFF; text-decoration: none; border-radius: var(--mg-radio); -webkit-tap-highlight-color: transparent; }
+.mg-c a:focus-visible { outline: 3px solid var(--ion); outline-offset: 5px; }
+.mg-escena.rejilla .mg-c a:focus-visible { outline-width: calc(3px / var(--sg)); outline-offset: calc(5px / var(--sg)); border-radius: calc(var(--mg-radio)); }
+.mg-c-fondo { display: none; }
+
+/* la foto: los fotogramas en fundido cruzado y un Ken Burns leve en la activa */
+.mg-c-foto { position: absolute; inset: 0; overflow: hidden; border-radius: var(--mg-radio); background: #0B0F16; transform: translateZ(0);
+  box-shadow: 0 2px 6px rgba(27, 41, 81, .1), 0 60px 110px -50px rgba(27, 41, 81, .55); }
+.mg-c-foto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.1s ease; transform: scale(1.001); }
+.mg-c-foto img.visible { opacity: 1; }
+.mg-c.activa .mg-c-foto img.visible { animation: mg-kb 9s cubic-bezier(.3, .2, .2, 1) both; }
+@keyframes mg-kb { from { transform: scale(1.001) translate3d(0, 0, 0); } to { transform: scale(1.075) translate3d(-1.2%, -0.8%, 0); } }
+.mg-escena.rejilla .mg-c-foto img { transition: opacity 1.1s ease, transform .9s cubic-bezier(.2, .7, .2, 1); }
+.mg-escena.rejilla .mg-c a:hover .mg-c-foto img.visible, .mg-escena.rejilla .mg-c a:focus-visible .mg-c-foto img.visible { transform: scale(1.05); }
+.mg-c-velo { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(5, 7, 10, 0) 38%, rgba(5, 7, 10, .3) 62%, rgba(5, 7, 10, .78) 100%), linear-gradient(90deg, rgba(5, 7, 10, .35), rgba(5, 7, 10, 0) 55%); }
+.mg-c-tipo { position: absolute; top: 22px; left: 22px; font-size: 13px; font-weight: 600; line-height: 1; padding: 8px 13px; border-radius: 999px; color: #FFFFFF;
+  background: rgba(5, 7, 10, .4); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14); }
+
+/* el texto del frente, sobre la foto */
+.mg-c-texto { position: absolute; left: clamp(26px, 3.4vw, 48px); right: 34%; bottom: clamp(24px, 3.2vw, 44px); display: flex; flex-direction: column; will-change: opacity; }
+.mg-c-cat { font-size: 15px; font-weight: 600; color: rgba(255, 255, 255, .78); letter-spacing: -0.01em; }
+.mg-c-nombre { font-size: clamp(42px, 5vw, 84px); font-weight: 700; letter-spacing: -0.045em; line-height: .98; margin-top: 6px; text-wrap: balance; }
+.mg-c-desc { font-size: clamp(16px, 1.25vw, 19px); line-height: 1.45; color: rgba(255, 255, 255, .84); margin-top: 14px; max-width: 40ch; text-wrap: pretty; }
+.mg-c-acciones { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 22px; }
+.mg-c-boton { display: inline-flex; border-radius: 999px; padding: 12px 22px; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; background: #FFFFFF; color: var(--mg-tinta); transition: transform .25s ease; }
+.mg-c a:hover .mg-c-boton { transform: translateY(-1px); }
+.mg-c-servidor, .mg-servidor-marca { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; }
+.mg-c-servidor { color: rgba(255, 255, 255, .82); }
+.mg-c-servidor::before, .mg-servidor-marca::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--ion); box-shadow: 0 0 0 3px rgba(14, 165, 233, .22); }
+
+/* la etiqueta pequeña de la rejilla: se dibuja grande y la escala de la rejilla la deja a su tamaño */
+.mg-c-mini { position: absolute; left: 0; right: 0; bottom: 0; color: #FFFFFF; padding: calc(12px / var(--sg)) calc(14px / var(--sg)); display: flex; flex-direction: column; gap: calc(2px / var(--sg));
+  background: linear-gradient(180deg, rgba(5, 7, 10, 0), rgba(5, 7, 10, .62)); opacity: 0; pointer-events: none; }
+.mg-c-mini b { font-size: calc(16px / var(--sg)); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.mg-c-mini span { font-size: calc(12px / var(--sg)); font-weight: 600; color: rgba(255, 255, 255, .78); }
+
+/* el final: las fichas para filtrar y la nota, encima y debajo de la rejilla */
+.mg-filtros { position: absolute; left: 0; right: 0; top: var(--rej-arriba, 120px); z-index: 3; display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; padding: 0 var(--margen); opacity: 0; pointer-events: none; }
+.mg-escena.rejilla .mg-filtros { pointer-events: auto; }
+.mg-ficha { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 10px 17px; cursor: pointer;
+  font: 600 14px/1 'Inter', system-ui, sans-serif; letter-spacing: -0.01em; color: var(--mg-tinta); background: rgba(27, 41, 81, .06); transition: background .25s ease, color .25s ease, transform .2s ease; }
+.mg-ficha:hover { background: rgba(27, 41, 81, .1); }
+.mg-ficha:active { transform: scale(.97); }
+.mg-ficha[aria-pressed="true"] { background: var(--mg-tinta); color: #FFFFFF; }
+.mg-ficha:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
+.mg-cuenta { font-size: 12px; font-weight: 500; opacity: .55; font-variant-numeric: tabular-nums; }
+.mg-c.fuera a { pointer-events: none; }
+.mg-nota { position: absolute; left: 50%; top: var(--rej-abajo, 80vh); transform: translateX(-50%); z-index: 3; width: min(64ch, calc(100% - 2 * var(--margen))); margin: 0;
+  font-size: 13px; line-height: 1.5; color: var(--mg-suave); text-align: center; opacity: 0; }
+.mg-servidor-marca { color: var(--mg-tinta); }
+
+/* ── móvil: una tarjeta a pantalla, con la foto arriba y el texto debajo; la siguiente asoma ── */
+@media (max-width: 719px) {
+  .mg-pista { height: 600vh; }
+  .mg-intro { align-items: flex-start; padding-top: max(92px, 13vh); }
+  .mg-intro .cabeza { max-width: none; }
+  .mg-intro .cabeza h2 { font-size: clamp(40px, 11vw, 56px); }
+  .mg-intro .cabeza .entrada { font-size: 16px; margin-top: 16px; }
+  .mg-capitulo b { font-size: 22px; }
+  .mg-c a { color: var(--mg-tinta); }
+  .mg-c-fondo { display: block; position: absolute; inset: 0; border-radius: 26px; background: var(--mg-niebla); }
+  .mg-c-foto { bottom: auto; height: var(--Hf); border-radius: 22px; box-shadow: 0 1px 2px rgba(27, 41, 81, .08), 0 30px 50px -34px rgba(27, 41, 81, .5); }
+  .mg-c-velo { display: none; }
+  .mg-c-tipo { top: 12px; left: 12px; font-size: 12px; padding: 7px 11px; }
+  .mg-c-texto { top: calc(var(--Hf) + 16px); left: 18px; right: 18px; bottom: 18px; }
+  .mg-c-cat { color: var(--mg-suave); font-size: 13px; }
+  .mg-c-nombre { font-size: 34px; margin-top: 4px; }
+  .mg-c-desc { color: var(--mg-suave); font-size: 15px; margin-top: 10px; }
+  .mg-c-acciones { margin-top: auto; padding-top: 14px; }
+  .mg-c-boton { background: var(--mg-tinta); color: #FFFFFF; padding: 11px 20px; }
+  .mg-c-servidor { color: var(--mg-suave); font-size: 12px; }
+  .mg-ficha { padding: 9px 12px; font-size: 13px; }
+  .mg-cuenta { display: none; }
+  .mg-filtros { gap: 6px; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+  .mg-filtros::-webkit-scrollbar { display: none; }
+  .mg-ficha { flex: 0 0 auto; }
+}
+
+/* reducir animaciones: la escena sigue (la cuenta el scroll), solo se calma el Ken Burns */
+@media (prefers-reduced-motion: reduce) {
+  .mg-c.activa .mg-c-foto img.visible { animation-duration: 14s; }
+  @keyframes mg-kb { from { transform: scale(1.001); } to { transform: scale(1.03); } }
+}
